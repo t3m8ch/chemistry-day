@@ -277,7 +277,7 @@ sqlcipher = ["sqlcipher3-binary"]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -304,7 +304,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "84b089244c2e2800b576c0428afe35aa0472a74c44cb7d615f60be5930df3cc7"
+content-hash = "d059dfb41491c20be86ddc2bf3553432b9bc69f1417dbf9d6b43a021edf4fa3b"
 
 [metadata.files]
 aiofiles = [
