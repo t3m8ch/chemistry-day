@@ -51,10 +51,10 @@ class TeamsServiceImpl:
             grade,
             team_name,
     ) -> None:
-        team_names = [
+        team_names = (
             row[0].strip().lower()
             for row in await self._session.execute(sa.select(models.Team.name))
-        ]
+        )
         if team_name.strip().lower() in team_names:
             raise TeamWithThisNameIsAlreadyExists(
                 captain_telegram_id,
