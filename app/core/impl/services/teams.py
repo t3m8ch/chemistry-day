@@ -3,10 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import models
-from app.core.exceptions.teams import (
-    TeamWithThisNameIsAlreadyExists,
-    CaptainWithThisTelegramIdIsAlreadyExists,
-)
+from app.core.exceptions.teams import TeamWithThisNameIsAlreadyExists
+from app.core.exceptions.players import PlayerWithThisTelegramIdIsAlreadyExists
 from .utils import create_player
 
 
@@ -37,9 +35,7 @@ class TeamsServiceImpl:
         team = models.Team(name=formatted_team_name, players=[captain])
 
         self._session.add(team)
-        await self._commit(
-            captain_telegram_id, captain_full_name, grade, team_name
-        )
+        await self._commit(captain_telegram_id)
 
         return team
 
@@ -62,20 +58,9 @@ class TeamsServiceImpl:
                 team_name,
             )
 
-    async def _commit(
-            self,
-            captain_telegram_id,
-            captain_full_name,
-            grade,
-            team_name,
-    ) -> None:
+    async def _commit(self, captain_telegram_id) -> None:
         try:
             await self._session.commit()
         except IntegrityError:
             await self._session.rollback()
-            raise CaptainWithThisTelegramIdIsAlreadyExists(
-                captain_telegram_id,
-                captain_full_name,
-                grade,
-                team_name,
-            )
+            raise PlayerWithThisTelegramIdIsAlreadyExists(captain_telegram_id)

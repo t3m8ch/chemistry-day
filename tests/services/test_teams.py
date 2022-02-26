@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core import models
-from app.core.exceptions.teams import TeamWithThisNameIsAlreadyExists, \
-    CaptainWithThisTelegramIdIsAlreadyExists
+from app.core.exceptions.teams import TeamWithThisNameIsAlreadyExists
+from app.core.exceptions.players import PlayerWithThisTelegramIdIsAlreadyExists
 from app.core.impl.services.teams import TeamsServiceImpl
 
 
@@ -80,11 +80,8 @@ async def test_create_team_if_captain_with_this_telegram_id_is_already_exists(
             grade=" 10A   ",
             team_name=" Dream TeAm  ",
         )
-    except CaptainWithThisTelegramIdIsAlreadyExists as e:
-        assert e.captain_telegram_id == 123
-        assert e.captain_full_name == " Petrov Ivan Alexandrovich   "
-        assert e.grade == " 10A   "
-        assert e.team_name == " Dream TeAm  "
+    except PlayerWithThisTelegramIdIsAlreadyExists as e:
+        assert e.telegram_id == 123
 
         assert await db_session.scalar(
             sa.select(sa.func.count()).select_from(models.Team)
