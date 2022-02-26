@@ -7,6 +7,7 @@ from app.core.exceptions.teams import (
     TeamWithThisNameIsAlreadyExists,
     CaptainWithThisTelegramIdIsAlreadyExists,
 )
+from .utils import create_player
 
 
 class TeamsServiceImpl:
@@ -25,16 +26,14 @@ class TeamsServiceImpl:
             captain_telegram_id, captain_full_name, grade, team_name
         )
 
-        formatted_captain_full_name = captain_full_name.strip()
-        formatted_grade = grade.strip().upper()
         formatted_team_name = team_name.strip()
-
-        captain = models.Player(
+        captain = create_player(
             telegram_id=captain_telegram_id,
-            full_name=formatted_captain_full_name,
-            grade=formatted_grade,
-            role=models.PlayerRole.captain,
+            full_name=captain_full_name,
+            grade=grade,
+            role=models.PlayerRole.captain
         )
+
         team = models.Team(name=formatted_team_name, players=[captain])
 
         self._session.add(team)
