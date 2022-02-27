@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 
 from .base import CoreException
@@ -9,3 +10,8 @@ class TeamWithThisNameIsAlreadyExists(CoreException):
     captain_full_name: str
     grade: str
     team_name: str
+
+
+@dataclass
+class TeamIsNotExists(CoreException):
+    team_id: uuid.UUID
