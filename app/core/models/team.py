@@ -10,3 +10,4 @@ class Team(ModelCommonMixin, Base):
     name = sa.Column(sa.Unicode(100), nullable=False, unique=True)
 
     players = relationship("Player", back_populates="team")
+    invites = relationship("TeamInvite", back_populates="team")

@@ -29,5 +29,10 @@ class Player(ModelCommonMixin, Base):
     )
     team = relationship("Team", back_populates="players")
 
+    team_invite_id = sa.Column(
+        UUID(as_uuid=True), sa.ForeignKey("team_invite.id"), nullable=True
+    )
+    team_invite = relationship("TeamInvite", back_populates="players")
+
     def __repr__(self):
         return f"Player({self.full_name=}, {self.grade=}, {self.role=})"
