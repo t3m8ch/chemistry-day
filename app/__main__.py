@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.init.settings import load_settings
 from app.tgbot import creating_team
+from app.tgbot.middlewares.bot_username import BotUsernameMiddleware
 from app.tgbot.middlewares.di import DIMiddleware
 
 router = Router()
@@ -22,15 +23,16 @@ def main():
 
     dp = Dispatcher()
 
+    bot = Bot(settings.tgbot.token, parse_mode="HTML")
     alchemy_engine = create_async_engine(settings.db.url)
     session_maker = sessionmaker(alchemy_engine, class_=AsyncSession)
 
+    dp.update.middleware(BotUsernameMiddleware(bot))
     dp.update.middleware(DIMiddleware(session_maker))
 
     dp.include_router(creating_team.router)
     dp.include_router(router)
 
-    bot = Bot(settings.tgbot.token, parse_mode="HTML")
     dp.run_polling(bot)
 
 
