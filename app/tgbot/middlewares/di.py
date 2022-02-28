@@ -4,6 +4,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 from sqlalchemy.orm import sessionmaker
 
+from app.core.impl.services.players import PlayersServiceImpl
 from app.core.impl.services.teams import TeamsServiceImpl
 
 
@@ -23,6 +24,7 @@ class DIMiddleware(BaseMiddleware):
 
         try:
             data["teams_service"] = TeamsServiceImpl(session)
+            data["players_service"] = PlayersServiceImpl(session)
             return await handler(event, data)
         finally:
             await session.close()
