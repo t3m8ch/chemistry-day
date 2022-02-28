@@ -26,6 +26,10 @@ class UnitTestsSettings(BaseSettings):
     db: DBSettings
 
 
+class DBScriptsSettings(BaseSettings):
+    db: DBSettings
+
+
 def load_settings(path: str = None, type_=AppSettings):
     default_paths: dict[Any, str] = {
         UnitTestsSettings: "config.tests.toml",
