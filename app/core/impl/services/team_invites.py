@@ -21,13 +21,6 @@ class TeamInvitesServiceImpl:
         await self._commit_invite_creating(team_id)
         return invite
 
-    async def _commit_invite_creating(self, team_id):
-        try:
-            await self._session.commit()
-        except IntegrityError:
-            await self._session.rollback()
-            raise TeamIsNotExists(team_id)
-
     async def accept_invite(
             self,
             *,
@@ -51,6 +44,13 @@ class TeamInvitesServiceImpl:
         self._session.add(player)
 
         await self._commit_invite_accepting(player_telegram_id)
+
+    async def _commit_invite_creating(self, team_id):
+        try:
+            await self._session.commit()
+        except IntegrityError:
+            await self._session.rollback()
+            raise TeamIsNotExists(team_id)
 
     async def _get_invite(self, invite_id):
         invite = await self._session.get(models.TeamInvite, invite_id)
