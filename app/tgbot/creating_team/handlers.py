@@ -2,7 +2,9 @@ from aiogram import Router, F, types
 from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 
+from app.core.abstractions.services.players import PlayersService
 from app.core.abstractions.services.teams import TeamsService
+from app.core.exceptions.players import PlayerWithThisTelegramIdIsNotExists
 
 router = Router()
 
@@ -15,11 +17,23 @@ class CreatingTeamSG(StatesGroup):
 
 @router.message(F.text == "/start create_team")
 @router.message(F.text == "/create_team")
-async def on_create_team(message: types.Message, state: FSMContext):
-    await message.reply(
-        "👦 Введите ФИО (Например, <i>Иванов Иван Иванович</i>)"
-    )
-    await state.set_state(CreatingTeamSG.input_full_name)
+async def on_create_team(
+        message: types.Message,
+        state: FSMContext,
+        players_service: PlayersService,
+):
+    try:
+        player = await players_service.get_by_telegram_id(
+            message.from_user.id, load_team=True
+        )
+    except PlayerWithThisTelegramIdIsNotExists:
+        await message.reply(
+            "👦 Введите ФИО (Например, <i>Иванов Иван Иванович</i>)"
+        )
+        await state.set_state(CreatingTeamSG.input_full_name)
+    else:
+        if player.team is not None:
+            await message.reply("❗ Вы уже состоите в команде")
 
 
 @router.message(CreatingTeamSG.input_full_name)
