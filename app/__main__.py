@@ -25,7 +25,9 @@ def main():
 
     bot = Bot(settings.tgbot.token, parse_mode="HTML")
     alchemy_engine = create_async_engine(settings.db.url)
-    session_maker = sessionmaker(alchemy_engine, class_=AsyncSession)
+    session_maker = sessionmaker(
+        alchemy_engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     dp.update.middleware(BotUsernameMiddleware(bot))
     dp.update.middleware(DIMiddleware(session_maker))
