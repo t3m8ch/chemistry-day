@@ -6,6 +6,7 @@ from app.core.abstractions.services.players import PlayersService
 from app.core.abstractions.services.team_invites import TeamInvitesService
 from app.core.abstractions.services.teams import TeamsService
 from app.core.exceptions.players import PlayerWithThisTelegramIdIsNotExists
+from app.core.exceptions.teams import TeamWithThisNameIsAlreadyExists
 from app.tgbot.invites.utils import send_create_invite_message
 from app.tgbot.utils import build_cancel_keyboard, CANCEL_PREFIX
 
@@ -88,12 +89,16 @@ async def on_input_team_name(
     full_name = data["full_name"]
     grade = data["grade"]
 
-    team = await teams_service.create_team(
-        captain_telegram_id=message.from_user.id,
-        captain_full_name=full_name,
-        grade=grade,
-        team_name=message.text,
-    )
+    try:
+        team = await teams_service.create_team(
+            captain_telegram_id=message.from_user.id,
+            captain_full_name=full_name,
+            grade=grade,
+            team_name=message.text,
+        )
+    except TeamWithThisNameIsAlreadyExists:
+        await message.reply("❗ Команда с данным именем уже существует")
+        return
 
     await message.reply("✅ Команда создана!")
     await send_create_invite_message(message, team.id, team_invites_service)
