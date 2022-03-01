@@ -5,8 +5,11 @@ from aiogram.dispatcher.fsm.state import StatesGroup, State
 from app.core.abstractions.services.players import PlayersService
 from app.core.abstractions.services.teams import TeamsService
 from app.core.exceptions.players import PlayerWithThisTelegramIdIsNotExists
+from app.tgbot.utils import build_cancel_keyboard, CANCEL_PREFIX
 
 router = Router()
+_ACTION = "creating_team"
+_cancel_kb = build_cancel_keyboard(_ACTION)
 
 
 class CreatingTeamSG(StatesGroup):
@@ -28,7 +31,8 @@ async def on_create_team(
         )
     except PlayerWithThisTelegramIdIsNotExists:
         await message.reply(
-            "👦 Введите ФИО (Например, <i>Иванов Иван Иванович</i>)"
+            "👦 Введите ФИО (Например, <i>Иванов Иван Иванович</i>)",
+            reply_markup=_cancel_kb,
         )
         await state.set_state(CreatingTeamSG.input_full_name)
     else:
@@ -43,7 +47,8 @@ async def on_input_full_name(message: types.Message, state: FSMContext):
         return
 
     await message.reply(
-        "🎓 Введите класс с буквой (например, <i>10А</i> или <i>6Г</i>"
+        "🎓 Введите класс с буквой (например, <i>10А</i> или <i>6Г</i>",
+        reply_markup=_cancel_kb,
     )
 
     await state.update_data(full_name=message.text)
@@ -57,7 +62,8 @@ async def on_input_grade(message: types.Message, state: FSMContext):
         return
 
     await message.reply(
-        "🥋 Введите название команды"
+        "🥋 Введите название команды",
+        reply_markup=_cancel_kb,
     )
 
     await state.update_data(grade=message.text)
@@ -89,3 +95,14 @@ async def on_input_team_name(
     await message.reply("✅ Команда создана!")
 
     await state.clear()
+
+
+@router.callback_query(F.data == f"{CANCEL_PREFIX}{_ACTION}")
+async def on_cancel_creating_team(cq: types.CallbackQuery, state: FSMContext):
+    await state.clear()
+    await cq.answer()
+    await cq.message.answer(
+        "😥 Создание команды отменено. \n"
+        "Если снова захотите поучавствовать в игре, "
+        "используйте команду /create_team"
+    )
