@@ -3,8 +3,10 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.dispatcher.fsm.state import StatesGroup, State
 
 from app.core.abstractions.services.players import PlayersService
+from app.core.abstractions.services.team_invites import TeamInvitesService
 from app.core.abstractions.services.teams import TeamsService
 from app.core.exceptions.players import PlayerWithThisTelegramIdIsNotExists
+from app.tgbot.invites.utils import send_create_invite_message
 from app.tgbot.utils import build_cancel_keyboard, CANCEL_PREFIX
 
 router = Router()
@@ -75,6 +77,7 @@ async def on_input_team_name(
         message: types.Message,
         state: FSMContext,
         teams_service: TeamsService,
+        team_invites_service: TeamInvitesService,
 ):
     if len(message.text) > 100:
         await message.reply("❗ Ваше сообщение длиннее 100 символов")
@@ -85,7 +88,7 @@ async def on_input_team_name(
     full_name = data["full_name"]
     grade = data["grade"]
 
-    await teams_service.create_team(
+    team = await teams_service.create_team(
         captain_telegram_id=message.from_user.id,
         captain_full_name=full_name,
         grade=grade,
@@ -93,6 +96,7 @@ async def on_input_team_name(
     )
 
     await message.reply("✅ Команда создана!")
+    await send_create_invite_message(message, team.id, team_invites_service)
 
     await state.clear()
 
